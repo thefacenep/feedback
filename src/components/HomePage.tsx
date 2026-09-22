@@ -26,7 +26,7 @@ export default function HomePage({ onNavigate, onSelectService }: HomePageProps)
 
   // Get positive feedback for the wall
   const positiveFeedback = complaints
-    .filter(c => c.serviceRating >= 4 && c.category === 'praise')
+    .filter(c => c && c.serviceRating >= 4 && c.category === 'praise')
     .slice(0, 4);
 
   return (
@@ -102,7 +102,7 @@ export default function HomePage({ onNavigate, onSelectService }: HomePageProps)
               <div className="text-xs md:text-sm text-gray-600">{t.resolvedComplaints}</div>
             </div>
             <div className="text-center p-3">
-              <div className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{(complaints.reduce((a, c) => a + c.serviceRating, 0) / complaints.length).toFixed(1)}</div>
+              <div className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{complaints.length > 0 ? (complaints.reduce((a, c) => a + (c.serviceRating || 0), 0) / complaints.length).toFixed(1) : '0.0'}</div>
               <div className="text-xs md:text-sm text-gray-600">{t.avgSatisfaction}</div>
             </div>
             <div className="text-center p-3">

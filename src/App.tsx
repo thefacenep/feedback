@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AppProvider } from './contexts/AppContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import FeedbackForm from './components/FeedbackForm';
@@ -26,16 +27,6 @@ function AppContent() {
       setTrackingCode(undefined);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Scroll to sections after render
-    if (page === 'services' || page === 'faq' || page === 'track' || page === 'contact') {
-      setTimeout(() => {
-        const el = document.getElementById(page === 'track' ? 'track' : page);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
   };
 
   const handleSelectService = (serviceId: string) => {
@@ -47,8 +38,8 @@ function AppContent() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage onNavigate={handleNavigate} onSelectService={handleSelectService} />;
       case 'services':
+      case 'faq':
         return <HomePage onNavigate={handleNavigate} onSelectService={handleSelectService} />;
       case 'feedback':
         return (
@@ -64,8 +55,6 @@ function AppContent() {
         return <StaffLogin onNavigate={handleNavigate} />;
       case 'dashboard':
         return <StaffDashboard onNavigate={handleNavigate} />;
-      case 'faq':
-        return <HomePage onNavigate={handleNavigate} onSelectService={handleSelectService} />;
       case 'contact':
         return <ContactPage />;
       default:
@@ -87,10 +76,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }

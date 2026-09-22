@@ -15,40 +15,84 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const staffUsers = [
-  { username: 'nayab1', password: 'pass123', name: 'Ram Bahadur Thapa', nameNe: 'राम बहादुर थापा', role: 'nayab_subba' as const, designation: 'Nayab Subba', designationNe: 'नायब सुब्बा' },
-  { username: 'officer1', password: 'pass123', name: 'Sita Sharma', nameNe: 'सीता शर्मा', role: 'tax_officer' as const, designation: 'Tax Officer', designationNe: 'कर अधिकृत' },
-  { username: 'chief1', password: 'pass123', name: 'Hari Prasad Pokharel', nameNe: 'हरि प्रसाद पोखरेल', role: 'chief_tax_officer' as const, designation: 'Chief Tax Officer', designationNe: 'प्रमुख कर अधिकृत' },
+const staffUsers: StaffUser[] = [
+  { username: 'nayab1', password: 'pass123', name: 'Ram Bahadur Thapa', nameNe: 'राम बहादुर थापा', role: 'nayab_subba', designation: 'Nayab Subba', designationNe: 'नायब सुब्बा' },
+  { username: 'officer1', password: 'pass123', name: 'Sita Sharma', nameNe: 'सीता शर्मा', role: 'tax_officer', designation: 'Tax Officer', designationNe: 'कर अधिकृत' },
+  { username: 'chief1', password: 'pass123', name: 'Hari Prasad Pokharel', nameNe: 'हरि प्रसाद पोखरेल', role: 'chief_tax_officer', designation: 'Chief Tax Officer', designationNe: 'प्रमुख कर अधिकृत' },
 ];
 
+function safeGetItem(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return window.localStorage.getItem(key);
+    }
+  } catch (e) {
+    // localStorage not available
+  }
+  return null;
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+  } catch (e) {
+    // localStorage not available
+  }
+}
+
+function safeRemoveItem(key: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(key);
+    }
+  } catch (e) {
+    // localStorage not available
+  }
+}
+
+function getInitialComplaints(): Complaint[] {
+  const stored = safeGetItem('iro_complaints');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch (e) {
+      // Invalid JSON
+    }
+  }
+  return generateMockComplaints();
+}
+
+function getInitialUser(): StaffUser | null {
+  const stored = safeGetItem('iro_current_user');
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      // Invalid JSON
+    }
+  }
+  return null;
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [complaints, setComplaints] = useState<Complaint[]>(() => {
-    const stored = localStorage.getItem('iro_complaints');
-    if (stored) {
-      try { return JSON.parse(stored); } catch { return generateMockComplaints(); }
-    }
-    return generateMockComplaints();
-  });
-
-  const [currentUser, setCurrentUser] = useState<StaffUser | null>(() => {
-    const stored = localStorage.getItem('iro_current_user');
-    if (stored) {
-      try { return JSON.parse(stored); } catch { return null; }
-    }
-    return null;
-  });
-
+  const [complaints, setComplaints] = useState<Complaint[]>(getInitialComplaints);
+  const [currentUser, setCurrentUser] = useState<StaffUser | null>(getInitialUser);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('iro_complaints', JSON.stringify(complaints));
+    safeSetItem('iro_complaints', JSON.stringify(complaints));
   }, [complaints]);
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('iro_current_user', JSON.stringify(currentUser));
+      safeSetItem('iro_current_user', JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem('iro_current_user');
+      safeRemoveItem('iro_current_user');
     }
   }, [currentUser]);
 

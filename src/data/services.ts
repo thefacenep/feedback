@@ -1,6 +1,12 @@
+export type ServiceKey = 
+  | 'helpDesk' | 'taxClearance' | 'pdcr' | 'fileTransfer' | 'personalPan'
+  | 'businessPan' | 'businessClosure' | 'businessDeregistration' | 'schemeApplication'
+  | 'vatAdjustment' | 'dueClearance' | 'bankAccount' | 'taxAudit' | 'investigation'
+  | 'complaint' | 'otherServices';
+
 export interface Service {
   id: string;
-  key: keyof typeof import('./translations').translations.en.services;
+  key: ServiceKey;
   icon: string;
   color: string;
 }

@@ -62,8 +62,8 @@ export default function StaffDashboard({ onNavigate }: StaffDashboardProps) {
   const resolvedCount = complaints.filter(c => c.status === 'resolved').length;
   const pendingCount = complaints.filter(c => c.status !== 'resolved' && c.status !== 'rejected').length;
   const avgSatisfaction = complaints.length > 0
-    ? (complaints.reduce((a, c) => a + c.serviceRating, 0) / complaints.length).toFixed(1)
-    : '0';
+    ? (complaints.reduce((a, c) => a + (c.serviceRating || 0), 0) / complaints.length).toFixed(1)
+    : '0.0';
 
   // Chart data
   const serviceDistribution = useMemo(() => {
@@ -71,20 +71,27 @@ export default function StaffDashboard({ onNavigate }: StaffDashboardProps) {
     complaints.forEach(c => {
       const svc = services.find(s => s.id === c.serviceId);
       if (svc) {
-        const name = t.services[svc.key];
+        const name = t.services[svc.key] || svc.key;
         counts[name] = (counts[name] || 0) + 1;
       }
     });
-    return Object.entries(counts).map(([name, value]) => ({ name: name.length > 15 ? name.slice(0, 15) + '...' : name, value })).slice(0, 8);
+    const result = Object.entries(counts).map(([name, value]) => ({ name: name.length > 15 ? name.slice(0, 15) + '...' : name, value })).slice(0, 8);
+    return result.length > 0 ? result : [{ name: 'No data', value: 1 }];
   }, [complaints, t]);
 
   const trendData = useMemo(() => {
-    const last7Days = [];
+    const last7Days: { date: string; complaints: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().slice(0, 10);
-      const count = complaints.filter(c => c.submittedAt.slice(0, 10) === dateStr).length;
+      const count = complaints.filter(c => {
+        try {
+          return c.submittedAt && c.submittedAt.slice(0, 10) === dateStr;
+        } catch {
+          return false;
+        }
+      }).length;
       last7Days.push({
         date: date.toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US', { weekday: 'short' }),
         complaints: count
@@ -98,15 +105,16 @@ export default function StaffDashboard({ onNavigate }: StaffDashboardProps) {
     complaints.forEach(c => {
       const svc = services.find(s => s.id === c.serviceId);
       if (svc) {
-        const key = t.services[svc.key];
+        const key = t.services[svc.key] || svc.key;
         if (!svcRatings[key]) svcRatings[key] = { total: 0, count: 0 };
         svcRatings[key].total += c.serviceRating;
         svcRatings[key].count += 1;
       }
     });
-    return Object.entries(svcRatings)
+    const result = Object.entries(svcRatings)
       .map(([name, data]) => ({ name: name.length > 12 ? name.slice(0, 12) + '...' : name, avg: +(data.total / data.count).toFixed(1) }))
       .slice(0, 8);
+    return result.length > 0 ? result : [{ name: 'No data', avg: 0 }];
   }, [complaints, t]);
 
   const COLORS = ['#1B3A6B', '#DC143C', '#D4AF37', '#2a5298', '#a01030', '#b8960f', '#4a90d9', '#e74c3c'];
@@ -212,9 +220,9 @@ export default function StaffDashboard({ onNavigate }: StaffDashboardProps) {
                 <h3 className="font-bold text-[#1B3A6B] mb-4">{t.serviceDistribution}</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <Pie data={serviceDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} labelLine={false}>
+                    <Pie data={serviceDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(entry: Record<string, unknown>) => `${String(entry.name || '')} (${((Number(entry.percent) || 0) * 100).toFixed(0)}%)`} labelLine={false}>
                       {serviceDistribution.map((_, idx) => (
-                        <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                        <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />

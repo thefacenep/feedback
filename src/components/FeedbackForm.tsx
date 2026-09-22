@@ -2,7 +2,11 @@ import { useState, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApp } from '../contexts/AppContext';
 import { services, Complaint } from '../data/services';
-import { v4 as uuidv4 } from 'uuid';
+
+// Simple ID generator
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+};
 
 interface FeedbackFormProps {
   serviceId: string | null;
@@ -55,7 +59,7 @@ export default function FeedbackForm({ serviceId, onClose, onNavigate }: Feedbac
 
     const code = generateCode();
     const complaint: Complaint = {
-      id: uuidv4(),
+      id: generateId(),
       code,
       serviceId: service.id,
       serviceKey: service.key,

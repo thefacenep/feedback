@@ -44,7 +44,7 @@ export default function ComplaintTracking({ initialCode }: ComplaintTrackingProp
     }
   };
 
-  const service = complaint ? services.find(s => s.id === complaint.serviceId) : null;
+  const service = complaint ? services.find(s => s.id === complaint.serviceId) || null : null;
 
   return (
     <div className="min-h-[80vh] py-8 px-4">
@@ -120,7 +120,7 @@ export default function ComplaintTracking({ initialCode }: ComplaintTrackingProp
                   <div className="absolute top-5 left-5 right-5 h-1 bg-gray-200 rounded-full -z-0">
                     <div
                       className="h-full bg-[#1B3A6B] rounded-full transition-all duration-1000"
-                      style={{ width: `${(getStatusIndex(complaint.status) / (statusSteps.length - 1)) * 100}%` }}
+                      style={{ width: `${Math.max(0, (getStatusIndex(complaint.status) / (statusSteps.length - 1)) * 100)}%` }}
                     ></div>
                   </div>
                 </div>
