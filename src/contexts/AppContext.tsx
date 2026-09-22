@@ -16,9 +16,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const staffUsers: StaffUser[] = [
-  { username: 'nayab1', password: 'pass123', name: 'Ram Bahadur Thapa', nameNe: 'राम बहादुर थापा', role: 'nayab_subba', designation: 'Nayab Subba', designationNe: 'नायब सुब्बा' },
-  { username: 'officer1', password: 'pass123', name: 'Sita Sharma', nameNe: 'सीता शर्मा', role: 'tax_officer', designation: 'Tax Officer', designationNe: 'कर अधिकृत' },
-  { username: 'chief1', password: 'pass123', name: 'Hari Prasad Pokharel', nameNe: 'हरि प्रसाद पोखरेल', role: 'chief_tax_officer', designation: 'Chief Tax Officer', designationNe: 'प्रमुख कर अधिकृत' },
+  { username: 'IRO-KOTESHWOR', password: 'Nepal@123', name: 'Master Admin', nameNe: 'मास्टर प्रशासक', role: 'chief_tax_officer', designation: 'Chief Tax Officer', designationNe: 'प्रमुख कर अधिकृत' },
 ];
 
 function safeGetItem(key: string): string | null {

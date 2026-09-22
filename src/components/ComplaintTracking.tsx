@@ -14,218 +14,167 @@ export default function ComplaintTracking({ initialCode }: ComplaintTrackingProp
   const [searched, setSearched] = useState(!!initialCode);
   const [error, setError] = useState('');
 
-  const complaint = searched ? complaints.find(c => c.code === code) : null;
+  const complaint = searched ? complaints.find(c => c.code === code.toUpperCase()) : null;
 
   const handleSearch = () => {
     if (!code.trim()) return;
     setSearched(true);
-    const found = complaints.find(c => c.code === code.toUpperCase());
-    if (!found) {
-      setError(t.noComplaint);
+    if (!complaints.find(c => c.code === code.toUpperCase())) {
+      setError(language === 'en' ? t.noComplaint : t.noComplaintNe);
       setTimeout(() => setError(''), 4000);
     }
   };
 
   const statusSteps = [
-    { key: 'submitted', label: t.statusSubmitted },
-    { key: 'under_review', label: t.statusUnderReview },
-    { key: 'in_progress', label: t.statusInProgress },
-    { key: 'resolved', label: t.statusResolved },
+    { key: 'submitted', label: language === 'en' ? t.statusSubmitted : t.statusSubmittedNe, icon: '📤' },
+    { key: 'under_review', label: language === 'en' ? t.statusUnderReview : t.statusUnderReviewNe, icon: '🔍' },
+    { key: 'in_progress', label: language === 'en' ? t.statusInProgress : t.statusInProgressNe, icon: '⚙️' },
+    { key: 'resolved', label: language === 'en' ? t.statusResolved : t.statusResolvedNe, icon: '✅' },
   ];
 
   const getStatusIndex = (status: string) => {
-    switch (status) {
-      case 'submitted': return 0;
-      case 'under_review': return 1;
-      case 'in_progress': return 2;
-      case 'resolved': return 3;
-      case 'rejected': return -1;
-      default: return 0;
-    }
+    const map: Record<string, number> = { submitted: 0, under_review: 1, in_progress: 2, resolved: 3, rejected: -1 };
+    return map[status] ?? 0;
   };
 
   const service = complaint ? services.find(s => s.id === complaint.serviceId) || null : null;
 
   return (
-    <div className="min-h-[80vh] py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Search Section */}
-        <div className="bg-gradient-to-br from-[#1B3A6B] to-[#2a5298] rounded-2xl p-6 md:p-10 text-white shadow-xl mb-8">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🔍</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">{t.trackTitle}</h2>
-            <p className="text-blue-200 text-sm">{t.trackSubtitle}</p>
+    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
+      {/* Search Header */}
+      <div className="bg-gradient-navy text-white px-4 pt-8 pb-10">
+        <div className="max-w-lg mx-auto text-center">
+          <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">🔍</span>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <h1 className="text-xl md:text-2xl font-bold mb-2">
+            {language === 'en' ? t.trackTitle : t.trackTitleNe}
+          </h1>
+          <p className="text-blue-200 text-sm mb-6">
+            {language === 'en' ? t.trackSubtitle : t.trackSubtitleNe}
+          </p>
+          <div className="flex gap-2">
             <input
               type="text"
               value={code}
               onChange={(e) => { setCode(e.target.value.toUpperCase()); setSearched(false); }}
-              placeholder={t.enterCode}
-              className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] backdrop-blur-sm"
+              placeholder={language === 'en' ? t.enterCode : t.enterCodeNe}
+              className="flex-1 px-4 py-3.5 rounded-xl bg-white/10 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] min-h-[48px] text-base"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              autoFocus
             />
             <button
               onClick={handleSearch}
-              className="px-6 py-3 bg-[#D4AF37] hover:bg-[#b8960f] rounded-lg font-semibold transition-all duration-300 shadow-lg"
+              className="px-5 py-3.5 bg-[#D4AF37] hover:bg-[#b8960f] rounded-xl font-bold transition-all btn-3d min-h-[48px] min-w-[48px]"
             >
-              {t.trackBtn}
+              →
             </button>
           </div>
-          {error && <p className="mt-3 text-red-300 text-sm text-center animate-fadeInUp">{error}</p>}
+          {error && <p className="mt-3 text-red-300 text-sm animate-fadeInUp">{error}</p>}
         </div>
-
-        {/* Result Section */}
-        {complaint && (
-          <div className="animate-fadeInUp space-y-6">
-            {/* Status Progress */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-[#1B3A6B]">{t.complaintStatus}</h3>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  complaint.status === 'resolved' ? 'bg-green-100 text-green-700' :
-                  complaint.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                  complaint.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                  complaint.status === 'under_review' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {complaint.status === 'rejected' ? t.statusRejected : statusSteps[getStatusIndex(complaint.status)]?.label}
-                </span>
-              </div>
-
-              {/* Progress Bar */}
-              {complaint.status !== 'rejected' && (
-                <div className="relative mb-8">
-                  <div className="flex justify-between items-center">
-                    {statusSteps.map((step, idx) => (
-                      <div key={step.key} className="flex flex-col items-center relative z-10">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 ${
-                          idx <= getStatusIndex(complaint.status)
-                            ? 'bg-[#1B3A6B] text-white shadow-lg'
-                            : 'bg-gray-200 text-gray-500'
-                        }`}>
-                          {idx <= getStatusIndex(complaint.status) ? '✓' : idx + 1}
-                        </div>
-                        <span className={`text-[10px] md:text-xs mt-2 text-center font-medium max-w-[80px] ${
-                          idx <= getStatusIndex(complaint.status) ? 'text-[#1B3A6B]' : 'text-gray-400'
-                        }`}>
-                          {step.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Progress Line */}
-                  <div className="absolute top-5 left-5 right-5 h-1 bg-gray-200 rounded-full -z-0">
-                    <div
-                      className="h-full bg-[#1B3A6B] rounded-full transition-all duration-1000"
-                      style={{ width: `${Math.max(0, (getStatusIndex(complaint.status) / (statusSteps.length - 1)) * 100)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              {complaint.status === 'rejected' && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-                  <p className="text-red-700 font-medium">{t.statusRejected}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h4 className="font-bold text-[#1B3A6B] mb-4 flex items-center gap-2">
-                  <span>📋</span> {t.complaintCode}
-                </h4>
-                <div className="space-y-3">
-                  <InfoRow label={t.complaintCode} value={complaint.code} mono />
-                  <InfoRow label={t.submittedOn} value={new Date(complaint.submittedAt).toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US')} />
-                  <InfoRow label={language === 'en' ? 'Service' : 'सेवा'} value={service ? t.services[service.key] : complaint.serviceKey} />
-                  <InfoRow label={t.category} value={complaint.category.charAt(0).toUpperCase() + complaint.category.slice(1)} />
-                  <InfoRow label={t.issueResolved} value={complaint.issueResolved === 'yes' ? t.yes : complaint.issueResolved === 'no' ? t.no : t.partially} />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h4 className="font-bold text-[#1B3A6B] mb-4 flex items-center gap-2">
-                  <span>⭐</span> {language === 'en' ? 'Ratings' : 'मूल्याङ्कन'}
-                </h4>
-                <div className="space-y-3">
-                  <RatingRow label={t.serviceExperience} value={complaint.serviceRating} />
-                  <RatingRow label={t.staffBehavior} value={complaint.staffRating} />
-                  <RatingRow label={t.waitingTime} value={complaint.waitingRating} />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h4 className="font-bold text-[#1B3A6B] mb-4 flex items-center gap-2">
-                  <span>👤</span> {t.assignedOfficer}
-                </h4>
-                <div className="space-y-3">
-                  <InfoRow label={language === 'en' ? 'Name' : 'नाम'} value={complaint.assignedOfficer || (language === 'en' ? 'Not yet assigned' : 'अझै तोकिएको छैन')} />
-                  <InfoRow label={language === 'en' ? 'Designation' : 'पद'} value={complaint.officerDesignation || '-'} />
-                  <InfoRow label={t.expectedResolution} value={complaint.expectedResolution || '-'} />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h4 className="font-bold text-[#1B3A6B] mb-4 flex items-center gap-2">
-                  <span>💬</span> {t.remarks}
-                </h4>
-                <div className="space-y-2">
-                  {complaint.remarks.length > 0 ? (
-                    complaint.remarks.map((remark, idx) => (
-                      <div key={idx} className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg">
-                        <span className="text-[#1B3A6B] mt-0.5">•</span>
-                        <span className="text-sm text-gray-700">{remark}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">{language === 'en' ? 'No remarks yet' : 'अझै कुनै टिप्पणी छैन'}</p>
-                  )}
-                </div>
-                {complaint.finalResolution && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-xs font-medium text-green-700 mb-1">{t.finalResolution}</p>
-                    <p className="text-sm text-green-800">{complaint.finalResolution}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {searched && !complaint && !error && (
-          <div className="text-center py-12">
-            <span className="text-5xl mb-4 block">🔍</span>
-            <p className="text-gray-500">{t.noComplaint}</p>
-          </div>
-        )}
       </div>
+
+      {/* Result */}
+      {complaint && (
+        <div className="px-4 py-6 max-w-lg mx-auto animate-fadeInUp space-y-4">
+          {/* Status Badge */}
+          <div className="card-mobile p-4">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs text-gray-500">{language === 'en' ? t.complaintCode : t.complaintCode}</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                complaint.status === 'resolved' ? 'bg-green-100 text-green-700' :
+                complaint.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                complaint.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                complaint.status === 'under_review' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {complaint.status === 'submitted' ? (language === 'en' ? t.statusSubmitted : t.statusSubmittedNe) :
+                 complaint.status === 'under_review' ? (language === 'en' ? t.statusUnderReview : t.statusUnderReviewNe) :
+                 complaint.status === 'in_progress' ? (language === 'en' ? t.statusInProgress : t.statusInProgressNe) :
+                 complaint.status === 'resolved' ? (language === 'en' ? t.statusResolved : t.statusResolvedNe) :
+                 (language === 'en' ? t.statusRejected : t.statusRejectedNe)}
+              </span>
+            </div>
+            <p className="font-mono text-lg font-bold text-[#DC143C]">{complaint.code}</p>
+          </div>
+
+          {/* Vertical Timeline - Mobile */}
+          <div className="card-mobile p-4">
+            <h3 className="font-bold text-[#1B3A6B] mb-4 text-sm">
+              {language === 'en' ? t.complaintStatus : t.complaintStatus}
+            </h3>
+            {complaint.status !== 'rejected' ? (
+              <div className="timeline-vertical space-y-6">
+                {statusSteps.map((step, idx) => {
+                  const isActive = idx === getStatusIndex(complaint.status);
+                  const isCompleted = idx < getStatusIndex(complaint.status);
+                  return (
+                    <div key={step.key} className="relative">
+                      <div className={`timeline-dot ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}></div>
+                      <div className={`pl-4 ${isActive ? 'font-semibold' : isCompleted ? '' : 'opacity-50'}`}>
+                        <p className="text-sm flex items-center gap-2">
+                          <span>{step.icon}</span>
+                          <span>{step.label}</span>
+                          {isCompleted && <span className="text-green-500 text-xs">✓</span>}
+                          {isActive && <span className="text-[10px] bg-[#1B3A6B] text-white px-2 py-0.5 rounded-full">Current</span>}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-red-700 font-medium text-sm">❌ {language === 'en' ? t.statusRejected : t.statusRejectedNe}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div className="card-mobile p-4 space-y-3">
+            <DetailRow label={language === 'en' ? 'Service' : 'सेवा'} value={service ? t.services[service.key] : ''} />
+            <DetailRow label={language === 'en' ? t.submittedOn : t.submittedOn} value={new Date(complaint.submittedAt).toLocaleDateString()} />
+            <DetailRow label={language === 'en' ? t.assignedOfficer : t.assignedOfficer} value={complaint.assignedOfficer || (language === 'en' ? 'Not assigned' : 'तोकिएको छैन')} />
+            <DetailRow label={language === 'en' ? t.expectedResolution : t.expectedResolution} value={complaint.expectedResolution || '-'} />
+          </div>
+
+          {/* Remarks */}
+          {complaint.remarks.length > 0 && (
+            <div className="card-mobile p-4">
+              <h4 className="font-bold text-[#1B3A6B] text-sm mb-2">{language === 'en' ? t.remarks : t.remarks}</h4>
+              <div className="space-y-2">
+                {complaint.remarks.map((r, i) => (
+                  <div key={i} className="text-sm bg-gray-50 rounded-lg p-2.5">• {r}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Final Resolution */}
+          {complaint.finalResolution && (
+            <div className="card-mobile p-4 border-2 border-green-200">
+              <h4 className="font-bold text-green-700 text-sm mb-2">✅ {language === 'en' ? t.finalResolution : t.finalResolution}</h4>
+              <p className="text-sm text-gray-700">{complaint.finalResolution}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!complaint && searched && !error && (
+        <div className="text-center py-16 px-4">
+          <span className="text-5xl block mb-4">🔍</span>
+          <p className="text-gray-500">{language === 'en' ? t.noComplaint : t.noComplaintNe}</p>
+        </div>
+      )}
     </div>
   );
 }
 
-function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className={`text-sm font-medium text-gray-800 ${mono ? 'font-mono' : ''}`}>{value}</span>
-    </div>
-  );
-}
-
-function RatingRow({ label, value }: { label: string; value: number }) {
-  const emojis = ['😞', '😕', '😐', '🙂', '😊'];
-  return (
-    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <div className="flex items-center gap-1">
-        <span className="text-lg">{emojis[value - 1]}</span>
-        <span className="text-sm font-medium text-gray-800">{value}/5</span>
-      </div>
+    <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm font-medium text-gray-800 text-right max-w-[60%]">{value}</span>
     </div>
   );
 }

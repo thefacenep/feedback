@@ -8,7 +8,6 @@ import FeedbackForm from './components/FeedbackForm';
 import ComplaintTracking from './components/ComplaintTracking';
 import StaffLogin from './components/StaffLogin';
 import StaffDashboard from './components/StaffDashboard';
-import ContactPage from './components/ContactPage';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 
@@ -40,6 +39,7 @@ function AppContent() {
       case 'home':
       case 'services':
       case 'faq':
+      case 'contact':
         return <HomePage onNavigate={handleNavigate} onSelectService={handleSelectService} />;
       case 'feedback':
         return (
@@ -55,8 +55,6 @@ function AppContent() {
         return <StaffLogin onNavigate={handleNavigate} />;
       case 'dashboard':
         return <StaffDashboard onNavigate={handleNavigate} />;
-      case 'contact':
-        return <ContactPage />;
       default:
         return <HomePage onNavigate={handleNavigate} onSelectService={handleSelectService} />;
     }

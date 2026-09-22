@@ -11,7 +11,6 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
   const { login, showToast } = useApp();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'nayab_subba' | 'tax_officer' | 'chief_tax_officer'>('nayab_subba');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,9 +18,10 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const user = login(username, password, role);
+    // Master login only
+    const user = login(username, password, 'chief_tax_officer');
     if (user) {
-      showToast(language === 'en' ? `Welcome, ${user.name}!` : `स्वागत छ, ${user.nameNe}!`, 'success');
+      showToast(language === 'en' ? `Welcome!` : 'स्वागत छ!', 'success');
       onNavigate('dashboard');
     } else {
       showToast(t.invalidCredentials, 'error');
@@ -29,17 +29,10 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
     setLoading(false);
   };
 
-  const roles = [
-    { value: 'nayab_subba', label: t.nayabSubba, icon: '👤', color: 'from-blue-500 to-blue-700' },
-    { value: 'tax_officer', label: t.taxOfficer, icon: '👔', color: 'from-purple-500 to-purple-700' },
-    { value: 'chief_tax_officer', label: t.chiefTaxOfficer, icon: '👑', color: 'from-[#D4AF37] to-[#b8960f]' },
-  ];
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-gray-50">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-br from-[#1B3A6B] to-[#2a5298] p-6 text-center text-white">
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-3xl">🔐</span>
@@ -48,29 +41,6 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
             <p className="text-blue-200 text-sm mt-1">{t.staffLoginSubtitle}</p>
           </div>
 
-          {/* Role Selection */}
-          <div className="p-6 border-b">
-            <label className="block text-sm font-medium text-gray-700 mb-3">{t.loginAs}</label>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map(r => (
-                <button
-                  key={r.value}
-                  type="button"
-                  onClick={() => setRole(r.value as typeof role)}
-                  className={`p-3 rounded-xl text-center transition-all duration-200 ${
-                    role === r.value
-                      ? `bg-gradient-to-br ${r.color} text-white shadow-lg scale-105`
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="text-xl block mb-1">{r.icon}</span>
-                  <span className="text-[10px] font-medium leading-tight block">{r.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t.username}</label>
@@ -78,9 +48,10 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1B3A6B] focus:border-transparent transition-all"
-                placeholder={language === 'en' ? 'Enter username' : 'प्रयोगकर्ता नाम प्रविष्ट गर्नुहोस्'}
+                className="input-mobile"
+                placeholder={language === 'en' ? 'Enter Staff ID' : 'कर्मचारी आईडी'}
                 required
+                autoFocus
               />
             </div>
             <div>
@@ -89,8 +60,8 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1B3A6B] focus:border-transparent transition-all"
-                placeholder={language === 'en' ? 'Enter password' : 'पासवर्ड प्रविष्ट गर्नुहोस्'}
+                className="input-mobile"
+                placeholder={language === 'en' ? 'Enter password' : 'पासवर्ड'}
                 required
               />
             </div>
@@ -98,7 +69,7 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[#DC143C] hover:bg-[#a01030] disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[#DC143C] hover:bg-[#a01030] disabled:bg-gray-400 text-white font-bold text-base rounded-xl btn-3d shadow-lg flex items-center justify-center gap-2 min-h-[52px]"
             >
               {loading ? (
                 <>
@@ -110,18 +81,6 @@ export default function StaffLogin({ onNavigate }: StaffLoginProps) {
                 </>
               ) : t.login}
             </button>
-
-            {/* Demo credentials */}
-            <div className="bg-blue-50 rounded-lg p-3 mt-4">
-              <p className="text-xs font-medium text-blue-800 mb-2">
-                {language === 'en' ? '🔑 Demo Credentials:' : '🔑 डेमो प्रमाणहरू:'}
-              </p>
-              <div className="space-y-1 text-xs text-blue-700">
-                <p><strong>{t.nayabSubba}:</strong> nayab1 / pass123</p>
-                <p><strong>{t.taxOfficer}:</strong> officer1 / pass123</p>
-                <p><strong>{t.chiefTaxOfficer}:</strong> chief1 / pass123</p>
-              </div>
-            </div>
           </form>
         </div>
       </div>
