@@ -1,1 +1,114 @@
 @import "tailwindcss";
+
+@theme {
+  --color-navy: #1B3A6B;
+  --color-navy-light: #2a5298;
+  --color-navy-dark: #0f2347;
+  --color-crimson: #DC143C;
+  --color-crimson-light: #ff2d55;
+  --color-crimson-dark: #a01030;
+  --color-gold: #D4AF37;
+  --color-gold-light: #f0d060;
+  --color-gold-dark: #b8960f;
+  --font-sans: 'Inter', 'Mukta', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', 'Mukta', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(27, 58, 107, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(27, 58, 107, 0.6);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.service-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(27, 58, 107, 0.15);
+}
+
+.progress-step {
+  transition: all 0.5s ease;
+}
+
+.toast-enter {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1B3A6B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0f2347;
+}
